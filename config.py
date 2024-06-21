@@ -1,0 +1,8 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+BOT_TOKEN = os.getenv('TOKEN')
+DATABASE_URL = os.getenv('DATABASE_URL')
+ADMINS = os.getenv('ADMINS').split(',')
