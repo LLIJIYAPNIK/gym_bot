@@ -1,4 +1,6 @@
 from sqlalchemy import select, and_, update, delete
+from .models import Base, Training
+from sqlalchemy.orm import sessionmaker
 
 
 class DatabaseManager:
@@ -19,12 +21,18 @@ class DatabaseManager:
       await session.refresh(instance)
       return instance
     
-  async def get_by_condition(self, condition, quantity: bool = False):
+  async def get_by_condition(self, condition, quantity: bool = False, select_this = Training.file_path):
     async with self.session_maker() as session:
-      result = await session.execute(select(self.model).where(condition))
+      result = await session.execute(select(select_this).where(condition))
       if not quantity:
         return result.scalars().first()
       return result.scalars().all()
+    
+  async def get_all(self, model):
+      async with self.session_maker() as session:
+          result = await session.execute(select(model))
+          columns = result.keys()
+          return result.fetchall()
     
   async def update(self, id: int, **kwargs):
     async with self.session_maker() as session:

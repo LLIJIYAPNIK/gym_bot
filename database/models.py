@@ -15,10 +15,10 @@ class Training(Base):
 	__tablename__ = 'trainings'
 	
 	id = Column(Integer, primary_key=True, autoincrement=True)
-	title = Column(String(255), nullable=False)
-	muscle_group = Column(String(255), nullable=False)
+	muscle = Column(String(255), nullable=False)
+	muscle_type = Column(String(255), nullable=False)
 	file_path = Column(String(255), nullable=False)
- 
+
 
 class Program(Base):
 	__tablename__ = 'programs'
