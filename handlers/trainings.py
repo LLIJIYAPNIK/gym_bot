@@ -1,13 +1,15 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InputMediaVideo, FSInputFile
 from database.models import Training
 from database.session import SessionLocal
 from keyboards.inline.start import get_start_kb
-from keyboards.inline.training import get_training_kb
+from aiogram.utils.chat_action import ChatActionSender
 from database.crud import DatabaseManager
 from keyboards.inline.training import MuscleKeyboard
 import json
 from create_bot import bot
+import os
+from config import VIDEO_DIR
 
 
 trainings_router = Router()
@@ -46,17 +48,27 @@ async def cmd_training(callback_query: CallbackQuery):
 @trainings_router.callback_query(lambda c: True)
 async def process_callback_data(callback_query: CallbackQuery):
     data = callback_query.data
-    
-    muscles = await get_muscles()
-    muscles_types = await get_muscle_types(data)
-    dictioary = json.loads(open('translations.json', 'r', encoding='utf-8').read())
-    print(dictioary)
-    
-    key = get_key_by_value(dictioary, data)
-    if key in muscles:
-        print(key)
-        await callback_query.message.edit_text('Выберете желаемую группу мышц:', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
-    else:
-        await callback_query.message.edit_text("Должно высылаться видео")
-    
-    
+    if str(data).isdigit():
+        muscles = await get_muscles()
+        # muscles_types = await get_muscle_types(data)
+        dictioary = json.loads(open('translations.json', 'r', encoding='utf-8').read())
+        print(dictioary)
+        
+        key = get_key_by_value(dictioary, data)
+        if key in muscles:
+            await callback_query.message.edit_text('Выберете желаемую группу мышц:', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
+        else:
+            file_paths = set(await DatabaseManager(Training, SessionLocal).get_by_condition(condition=(Training.muscle_type == key), quantity=True, select_this=Training.file_path))
+                        
+            media = []
+            
+            for file_path in file_paths:
+                media.append(InputMediaVideo(type="video", media=FSInputFile(path=os.path.join(VIDEO_DIR, f"{file_path}.mp4"))))
+            
+            if media:
+                async with ChatActionSender.upload_video(bot=bot, chat_id=callback_query.message.chat.id):
+                    await callback_query.message.delete()
+                    await bot.send_media_group(callback_query.message.chat.id, media)
+            else:
+                await callback_query.message.delete()
+                await callback_query.message.edit_text('Нет видео для этого упражнения')
