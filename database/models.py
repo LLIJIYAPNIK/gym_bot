@@ -17,7 +17,7 @@ class Training(Base):
 	id = Column(Integer, primary_key=True, autoincrement=True)
 	muscle = Column(String(255), nullable=False)
 	muscle_type = Column(String(255), nullable=False)
-	file_path = Column(String(255), nullable=False)
+	video_id = Column(String(255), nullable=False, unique=True)
 
 
 class Program(Base):

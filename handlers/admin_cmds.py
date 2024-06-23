@@ -1,5 +1,5 @@
-from aiogram import Router
-from aiogram.types import Message, FSInputFile
+from aiogram import Router, F
+from aiogram.types import Message, FSInputFile, ContentType
 from aiogram.filters import Command
 from database.models import Training
 from database.session import SessionLocal
@@ -7,8 +7,8 @@ from database.crud import DatabaseManager
 from database.models import Base
 from xlsxwriter import Workbook
 import os
-from config import ADMINS, TABLES
 from sqlalchemy import inspect
+from config import ADMINS, TABLES
 
 
 admin_router = Router()
@@ -23,9 +23,9 @@ async def cmd_add_muscle(message: Message):
   if str(message.from_user.id) in ADMINS:
     args = message.text.split()[1:]
     
-    muscle, muscle_type, file_path = args
+    muscle, muscle_type, video_id = args
     
-    await DatabaseManager(model=Training, session_maker=SessionLocal).add(muscle=muscle, muscle_type=muscle_type, file_path=file_path)
+    await DatabaseManager(model=Training, session_maker=SessionLocal).add(muscle=muscle, muscle_type=muscle_type, video_id=video_id)
     
     await message.reply('Упражнение добавлено')
   else:
@@ -37,9 +37,9 @@ async def cmd_edit_muscle(message: Message):
 		if str(message.from_user.id) in ADMINS:
 			args = message.text.split()[1:]
 			
-			id_, muscle, muscle_type, file_path = args
+			id_, muscle, muscle_type, video_id = args
 			
-			await DatabaseManager(model=Training, session_maker=SessionLocal).update(int(id_), muscle=muscle, muscle_type=muscle_type, file_path=file_path)
+			await DatabaseManager(model=Training, session_maker=SessionLocal).update(int(id_), muscle=muscle, muscle_type=muscle_type, video_id=video_id)
 			
 			await message.reply('Упражнение изменено')
 		else:
@@ -91,5 +91,15 @@ async def get_table(message: Message):
     else:
       await message.reply("Такая таблица не существует")
   else:
+    await message.reply("У вас нет прав для выполнения этой команды")  
+
+
+@admin_router.message(F.content_type == ContentType.VIDEO)
+async def get_video_id(message: Message):
+  if str(message.from_user.id) in ADMINS:
+    video_id = message.video.file_id
+    await message.reply(f"ID видео: {video_id}")
+  else:
     await message.reply("У вас нет прав для выполнения этой команды")
     
+

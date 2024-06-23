@@ -8,8 +8,6 @@ from database.crud import DatabaseManager
 from keyboards.inline.training import MuscleKeyboard
 import json
 from create_bot import bot
-import os
-from config import VIDEO_DIR
 
 
 trainings_router = Router()
@@ -58,17 +56,13 @@ async def process_callback_data(callback_query: CallbackQuery):
         if key in muscles:
             await callback_query.message.edit_text('Выберете желаемую группу мышц:', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
         else:
-            file_paths = set(await DatabaseManager(Training, SessionLocal).get_by_condition(condition=(Training.muscle_type == key), quantity=True, select_this=Training.file_path))
-                        
-            media = []
+            video_ids = set(await DatabaseManager(Training, SessionLocal).get_by_condition(condition=(Training.muscle_type == key), quantity=True, select_this=Training.video_id))
             
-            for file_path in file_paths:
-                media.append(InputMediaVideo(type="video", media=FSInputFile(path=os.path.join(VIDEO_DIR, f"{file_path}.mp4"))))
-            
-            if media:
+            if video_ids:
                 async with ChatActionSender.upload_video(bot=bot, chat_id=callback_query.message.chat.id):
                     await callback_query.message.delete()
-                    await bot.send_media_group(callback_query.message.chat.id, media)
+                    await bot.send_media_group(callback_query.message.chat.id, [InputMediaVideo(type="video", media=video_id) for video_id in video_ids])
             else:
                 await callback_query.message.delete()
-                await callback_query.message.edit_text('Нет видео для этого упражнения')
+                await callback_query.message.edit_text('Нет видео для этого упражнения', reply_markup=await get_start_kb())
+            

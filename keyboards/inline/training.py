@@ -2,7 +2,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.crud import DatabaseManager
 from database.session import SessionLocal
 from database.models import Training
-from database.models import Base
 import random
 import json
 

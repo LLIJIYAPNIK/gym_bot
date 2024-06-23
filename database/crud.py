@@ -21,7 +21,7 @@ class DatabaseManager:
       await session.refresh(instance)
       return instance
     
-  async def get_by_condition(self, condition, quantity: bool = False, select_this = Training.file_path):
+  async def get_by_condition(self, condition, quantity: bool = False, select_this = Training):
     async with self.session_maker() as session:
       result = await session.execute(select(select_this).where(condition))
       if not quantity:
