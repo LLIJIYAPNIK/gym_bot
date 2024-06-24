@@ -9,6 +9,7 @@ from xlsxwriter import Workbook
 import os
 from sqlalchemy import inspect
 from config import ADMINS, TABLES
+from create_bot import bot
 
 
 admin_router = Router()
@@ -97,9 +98,56 @@ async def get_table(message: Message):
 @admin_router.message(F.content_type == ContentType.VIDEO)
 async def get_video_id(message: Message):
   if str(message.from_user.id) in ADMINS:
-    video_id = message.video.file_id
+    video_id = message.video[-1].file_id
     await message.reply(f"ID видео: {video_id}")
   else:
     await message.reply("У вас нет прав для выполнения этой команды")
     
 
+@admin_router.message(F.content_type == ContentType.DOCUMENT)
+async def get_document_id(message: Message):
+  if str(message.from_user.id) in ADMINS:
+    document_id = message.document.file_id
+    await message.reply(f"ID документа: {document_id}")
+  else:
+    await message.reply("У вас нет прав для выполнения этой команды")
+    
+    
+@admin_router.message(Command("send_document"))
+async def send_document(message: Message):
+  if str(message.from_user.id) in ADMINS:
+    args = message.text.split()[1:]
+    
+    user_id, document_type, document_id = args
+    if document_type.lower() in ["меню", "программа"]:
+      try:
+        await bot.forward_messages(chat_id=user_id, from_chat_id=message.chat.id, message_id=document_id)
+      except (ValueError):
+        await message.reply("Неверный ID документа/пользователя. Использование: /send_document [user_id] [document_type] [document_id]")
+    else:
+      await message.reply("Такого типа документа нет. (Меню/Программа)")
+  else:
+    await message.reply("У вас нет прав для выполнения этой команды")
+    
+    
+@admin_router.message(Command("get_document"))
+async def get_document(message: Message):
+  if str(message.from_user.id) in ADMINS:
+    document_id = message.text.split()[1]
+    
+    await message.answer_document(document_id)
+  else:
+    await message.reply("У вас нет прав для выполнения этой команды")
+    
+    
+@admin_router.message(Command("get_username"))
+async def get_username(message: Message):
+  if str(message.from_user.id) in ADMINS:
+    user_id = message.text.split()[1]
+    
+    user = await bot.get_chat(int(user_id))
+    username = user.username
+    
+    await message.answer(f"@{username}")
+  else:    
+    await message.reply("У вас нет прав для выполнения этой команды")

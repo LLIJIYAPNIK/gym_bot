@@ -1,6 +1,6 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from keyboards.inline.start import get_start_kb
 
 
@@ -8,4 +8,9 @@ start_router = Router()
 
 @start_router.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer('Запуск сообщения по команде /start используя фильтр CommandStart()', reply_markup=get_start_kb())
+    await message.answer('Добро пожаловать! Выберите интересующий раздел, чтобы начать', reply_markup=get_start_kb())
+    
+
+@start_router.callback_query(F.data == 'back_to_start')
+async def cmd_back_to_start(callback_query: CallbackQuery):
+    await callback_query.message.edit_text('Добро пожаловать! Выберите интересующий раздел, чтобы начать', reply_markup=get_start_kb())

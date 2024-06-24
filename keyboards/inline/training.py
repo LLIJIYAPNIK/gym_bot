@@ -6,34 +6,6 @@ import random
 import json
 
 
-def get_training_kb() -> InlineKeyboardMarkup:
-  kb_list = [
-		[InlineKeyboardButton(text="Спина", callback_data="back_training")],
-		[InlineKeyboardButton(text="Грудь", callback_data="chest_training")],
-		[InlineKeyboardButton(text="Плечи", callback_data="shoulders_training")],
-		[InlineKeyboardButton(text="Ноги", callback_data="legs_training")],
-		[InlineKeyboardButton(text="Руки", callback_data="arms_training")],
-		[InlineKeyboardButton(text="Пресс", callback_data="press_training")],
-		[InlineKeyboardButton(text="Назад", callback_data="back_to_start")]
-	]
-  
-  return InlineKeyboardMarkup(inline_keyboard=kb_list)
-
-
-def get_chest_kb():
-  kb_list = [
-		[InlineKeyboardButton(text="Назад", callback_data="back_to_training")],
-		[InlineKeyboardButton(text="Верхняя часть", callback_data="upper_chest")],
-		[InlineKeyboardButton(text="Нижняя часть", callback_data="lower_chest")],
-		[InlineKeyboardButton(text="Середина", callback_data="middle_chest")]
-	]
-  
-  return InlineKeyboardMarkup(inline_keyboard=kb_list)
-
-words = {
-	"trap": "Трапецевидные мышцы",
-}
-
 class MuscleKeyboard:
     def __init__(self):
         self.translations = self.load_translations()
@@ -51,7 +23,7 @@ class MuscleKeyboard:
 
     def get_or_create_translation(self, russian):
         if russian not in self.translations:
-            self.translations[russian] = random.randint(0, 1000)
+            self.translations[russian] = self.create_value()
             self.save_translations()
         return self.translations[russian]
 
@@ -79,5 +51,10 @@ class MuscleKeyboard:
 
         return InlineKeyboardMarkup(inline_keyboard=kb_list)
     
-
-
+    def create_value(self):
+        num = random.randint(0, 1000)
+        while True:
+            if num not in self.translations.values():
+                return num
+            else:
+                num = random.randint(0, 1000)

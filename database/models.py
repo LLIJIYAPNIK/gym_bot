@@ -8,7 +8,7 @@ class User(Base):
   __tablename__ = 'users'
   
   id = Column(Integer, primary_key=True, autoincrement=True)
-  username = Column(String(255), nullable=False, unique=True)
+  user_id = Column(Integer, nullable=False, unique=True)
 
 
 class Training(Base):
@@ -24,14 +24,24 @@ class Program(Base):
 	__tablename__ = 'programs'
 	
 	id = Column(Integer, primary_key=True, autoincrement=True)
-	title = Column(String(255), nullable=False)
+	user_id = Column(Integer, nullable=False)
 	type_training = Column(String(255), nullable=False)
-	file_path = Column(String(255), nullable=False)
+	file_id = Column(String(255), nullable=False)
  
  
 class Menu(Base):
 	__tablename__ = 'menus'
 	
 	id = Column(Integer, primary_key=True, autoincrement=True)
+	user_id = Column(Integer, nullable=False)
 	type_menu = Column(String(255), nullable=False)
-	file_path = Column(String(255), nullable=False)
+	file_id = Column(String(255), nullable=False)
+ 
+
+class Questionnaire(Base):
+	__tablename__ = 'questionnaire' 
+  
+	id = Column(Integer, primary_key=True, autoincrement=True)
+	user_id = Column(Integer, nullable=False)
+	type_questionnaire = Column(String(255), nullable=False)
+	questionnaire_id = Column(String(255), nullable=False)

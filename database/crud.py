@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_, update, delete
+from sqlalchemy import select, update, delete
 from .models import Base, Training
 from sqlalchemy.orm import sessionmaker
 
@@ -39,9 +39,9 @@ class DatabaseManager:
       await session.execute(update(self.model).where(self.model.id == id).values(**kwargs))
       await session.commit()
       
-  async def update_by_condition(self, condition, **kwargs):
+  async def update_by_condition(self, condition, update_this, **kwargs):
     async with self.session_maker() as session:
-      await session.execute(update(self.model).where(condition).values(**kwargs))
+      await session.execute(update(update_this).where(condition).values(**kwargs))
       await session.commit()
       
   async def delete(self, id: int):

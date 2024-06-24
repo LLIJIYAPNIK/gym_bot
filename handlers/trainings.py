@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InputMediaVideo, FSInputFile
+from aiogram.types import CallbackQuery, InputMediaVideo
 from database.models import Training
 from database.session import SessionLocal
 from keyboards.inline.start import get_start_kb
@@ -11,16 +11,11 @@ from create_bot import bot
 
 
 trainings_router = Router()
-video_router = Router()
 
-@trainings_router.callback_query(F.data == 'back_to_start')
-async def cmd_back_to_start(callback_query: CallbackQuery):
-    await callback_query.message.edit_text('Запуск сообщения по команде /start используя фильтр CommandStart()', reply_markup=get_start_kb())
-    
 
 @trainings_router.callback_query(F.data == 'back_to_training')
 async def cmd_back_to_training(callback_query: CallbackQuery):
-    await callback_query.message.edit_text('Выберете желаемую группу мышц', reply_markup=await MuscleKeyboard().get_main_keyboard())
+    await callback_query.message.edit_text('Выберите группу мышц, чтобы продолжить', reply_markup=await MuscleKeyboard().get_main_keyboard())
 
 
 def get_key_by_value(dictionary, value):
@@ -40,7 +35,7 @@ async def get_muscle_types(muscle):
 
 @trainings_router.callback_query(F.data == 'training')
 async def cmd_training(callback_query: CallbackQuery):
-    await callback_query.message.edit_text('Выберете желаемую группу мышц', reply_markup=await MuscleKeyboard().get_main_keyboard())
+    await callback_query.message.edit_text('Выберите группу мышц, чтобы продолжить', reply_markup=await MuscleKeyboard().get_main_keyboard())
 
 
 @trainings_router.callback_query(lambda c: True)
@@ -54,7 +49,7 @@ async def process_callback_data(callback_query: CallbackQuery):
         
         key = get_key_by_value(dictioary, data)
         if key in muscles:
-            await callback_query.message.edit_text('Выберете желаемую группу мышц:', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
+            await callback_query.message.edit_text('Выберите группу мышц, чтобы увидеть доступные упражнения', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
         else:
             video_ids = set(await DatabaseManager(Training, SessionLocal).get_by_condition(condition=(Training.muscle_type == key), quantity=True, select_this=Training.video_id))
             
