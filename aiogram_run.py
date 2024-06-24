@@ -16,7 +16,7 @@ async def create_tables():
 
 async def main():
     await create_tables()
-    
+
     dp.include_router(program_router)
     dp.include_router(menu_router)
     dp.include_router(start_router)
@@ -24,6 +24,7 @@ async def main():
     dp.include_router(admin_router)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
