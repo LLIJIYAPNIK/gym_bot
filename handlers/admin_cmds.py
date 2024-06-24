@@ -23,7 +23,6 @@ def get_column_names(cls):
 
 @admin_router.message(Command("add_muscle"))
 async def cmd_add_muscle(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -40,7 +39,6 @@ async def cmd_add_muscle(message: Message, state: FSMContext):
 
 @admin_router.message(Command("edit_muscle"))
 async def cmd_edit_muscle(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -57,7 +55,6 @@ async def cmd_edit_muscle(message: Message, state: FSMContext):
 
 @admin_router.message(Command("delete_muscle"))
 async def delete_muscle(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -74,7 +71,6 @@ async def delete_muscle(message: Message, state: FSMContext):
 
 @admin_router.message(Command("get_table"))
 async def get_table(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         table_name = message.text.split()[1]
         if table_name in TABLES:
@@ -113,7 +109,6 @@ async def get_table(message: Message, state: FSMContext):
 
 @admin_router.message(F.content_type == ContentType.VIDEO)
 async def get_video_id(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         video_id = message.video[-1].file_id
         await message.reply(f"ID видео: {video_id}")
@@ -133,7 +128,6 @@ async def get_document_id(message: Message, state: FSMContext):
 
 @admin_router.message(Command("send_document"))
 async def send_document(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -157,7 +151,6 @@ async def send_document(message: Message, state: FSMContext):
 
 @admin_router.message(Command("get_document"))
 async def get_document(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         document_id = message.text.split()[1]
 
@@ -168,7 +161,6 @@ async def get_document(message: Message, state: FSMContext):
 
 @admin_router.message(Command("get_username"))
 async def get_username(message: Message, state: FSMContext):
-    await state.clear()
     if str(message.from_user.id) in ADMINS:
         user_id = message.text.split()[1]
 
@@ -178,3 +170,19 @@ async def get_username(message: Message, state: FSMContext):
         await message.answer(f"@{username}")
     else:
         await message.reply("У вас нет прав для выполнения этой команды")
+        
+        
+@admin_router.message(Command("commands"))
+async def get_commands(message: Message, state: FSMContext):
+    await message.answer(
+"""/add_muscle [muscle] [muscle_type] [video_id] - добавляет в базу данных упражнение. muscle - группа мышц (Спина), muscle_type - отдельная мыщца (Широчайшая), video_id - id видео\n
+/edit_muscle [id] [muscle] [muscle_type] [video_id] - изменяет упражнение в базе данных. id - номер упражнения в базе данных, muscle, muscle_type, video_id - новые значения\n
+/delete_muscle [id] - удаляет упражнение из базы данных. id - номер упражнения в базе данных\n
+/get_table [table_name] - показывает структуру таблицы. Таблицы в боте: trainings, menus, programs, questionnaire. trainings - упражнения, menus - меню, programs - программы, questionnaire - анкеты пользователей, а также тип анкеты (Программа тренировок, Меню)\n
+/send_document [user_id] [document_type] [document_id] - отправляет документ пользователю. user_id - id пользователя, document_type - тип документа (Меню/Программа), document_id - id документа\n
+/get_document [document_id] - показывает документ. document_id - id документа\n
+/get_username [user_id] - показывает имя пользователя. user_id - id пользователя\n
+Отправка видео или документа - администратор получит ID файла, который можно использовать в будущем. Пример использования:\n
+Пользователь попросил составить ему программу тренировок. Информация занесена в базу данных. Там хранится его ID. Тренер составил программу. Администратор отправляет в чат с ботом файл, бот возвращает ему ID документа, после чего можно отправить его в чат с пользователем.
+"""
+    )
