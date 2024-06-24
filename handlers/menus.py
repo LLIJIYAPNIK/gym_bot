@@ -89,7 +89,7 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
         )
 
 
-class Form(StatesGroup):
+class FormMenu(StatesGroup):
     age = State()
     sex = State()
     activity = State()
@@ -100,17 +100,22 @@ class Form(StatesGroup):
 
 @menu_router.callback_query(F.data == "personal_program")
 async def cmd_personal_program(callback_query: CallbackQuery, state: FSMContext):
-    await state.set_state(Form.age)
-    await callback_query.message.edit_text(
-        "Для получения персонального меню нужно заполнить анкету. Давайте начнём. Введите ваш возраст: "
-    )
+    if callback_query.from_user.username:
+        await state.set_state(FormMenu.age)
+        await callback_query.message.edit_text(
+            "Для получения персонального меню нужно заполнить анкету. Давайте начнём. Введите ваш возраст: "
+        )
+    else:
+        await callback_query.message.answer(
+            "Ваш нужно создать никнейм в Telegram, чтобы позже с Вами мог связаться тренер"
+        )
 
 
-@menu_router.message(Form.age)
+@menu_router.message(FormMenu.age)
 async def get_age(message: Message, state: FSMContext):
     if message.text.isdigit():
         await state.update_data(age=message.text)
-        await state.set_state(Form.sex)
+        await state.set_state(FormMenu.sex)
 
         keyboard = ReplyKeyboardMarkup(
             keyboard=[
@@ -128,11 +133,11 @@ async def get_age(message: Message, state: FSMContext):
         )
 
 
-@menu_router.message(Form.sex)
+@menu_router.message(FormMenu.sex)
 async def get_sex(message: Message, state: FSMContext):
     if message.text.lower() in ["мужской", "женской"]:
         await state.update_data(sex=message.text)
-        await state.set_state(Form.activity)
+        await state.set_state(FormMenu.activity)
         await message.answer(
             "Ваш уровень активности: ", reply_markup=ReplyKeyboardRemove()
         )
@@ -142,30 +147,30 @@ async def get_sex(message: Message, state: FSMContext):
         )
 
 
-@menu_router.message(Form.activity)
+@menu_router.message(FormMenu.activity)
 async def get_activity(message: Message, state: FSMContext):
     await state.update_data(activity=message.text)
-    await state.set_state(Form.purpose)
+    await state.set_state(FormMenu.purpose)
     await message.answer("Ваша цель: ")
 
 
-@menu_router.message(Form.purpose)
+@menu_router.message(FormMenu.purpose)
 async def get_purpose(message: Message, state: FSMContext):
     await state.update_data(purpose=message.text)
-    await state.set_state(Form.limit)
+    await state.set_state(FormMenu.limit)
     await message.answer("Ваши ограничения: ")
 
 
-@menu_router.message(Form.limit)
+@menu_router.message(FormMenu.limit)
 async def get_limit(message: Message, state: FSMContext):
     await state.update_data(limit=message.text)
-    await state.set_state(Form.medicine)
+    await state.set_state(FormMenu.medicine)
     await message.answer(
         "Есть ли у вас аллергические реакции или хронические заболевания? "
     )
 
 
-@menu_router.message(Form.medicine)
+@menu_router.message(FormMenu.medicine)
 async def get_medicine(message: Message, state: FSMContext):
     await state.update_data(medicine=message.text)
     data = await state.get_data()

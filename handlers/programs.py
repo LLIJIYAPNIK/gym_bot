@@ -1,3 +1,4 @@
+import re
 from aiogram import Router, F
 from aiogram.types import (
     CallbackQuery,
@@ -52,12 +53,14 @@ async def cmd_pr1(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         try:
-          await bot.send_document(
-              callback_query.message.chat.id,
-              InputMediaDocument(type="document", media="file_id"),
-          )
+            await bot.send_document(
+                callback_query.message.chat.id,
+                InputMediaDocument(type="document", media="file_id"),
+            )
         except:
-          await callback_query.message.edit_text("Документ не найден. Попробуйте позже")
+            await callback_query.message.edit_text(
+                "Документ не найден. Попробуйте позже"
+            )
 
 
 @program_router.callback_query(F.data == "pr2")
@@ -67,12 +70,14 @@ async def cmd_pr1(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         try:
-          await bot.send_document(
-              callback_query.message.chat.id,
-              InputMediaDocument(type="document", media="file_id"),
-          )
+            await bot.send_document(
+                callback_query.message.chat.id,
+                InputMediaDocument(type="document", media="file_id"),
+            )
         except:
-          await callback_query.message.edit_text("Документ не найден. Попробуйте позже")
+            await callback_query.message.edit_text(
+                "Документ не найден. Попробуйте позже"
+            )
 
 
 @program_router.callback_query(F.data == "pr3")
@@ -82,12 +87,14 @@ async def cmd_pr1(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         try:
-          await bot.send_document(
-              callback_query.message.chat.id,
-              InputMediaDocument(type="document", media="file_id"),
-          )
+            await bot.send_document(
+                callback_query.message.chat.id,
+                InputMediaDocument(type="document", media="file_id"),
+            )
         except:
-          await callback_query.message.edit_text("Документ не найден. Попробуйте позже")
+            await callback_query.message.edit_text(
+                "Документ не найден. Попробуйте позже"
+            )
 
 
 class Form(StatesGroup):
@@ -105,23 +112,28 @@ class Form(StatesGroup):
 
 @program_router.callback_query(F.data == "personal_trains")
 async def cmd_personal_program(callback_query: CallbackQuery, state: FSMContext):
-    await state.set_state(Form.physical_training)
+    if callback_query.message.from_user.username:
+        await state.set_state(Form.physical_training)
 
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="Начальный")],
-            [KeyboardButton(text="Средний")],
-            [KeyboardButton(text="Продвинутый")],
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True,
-    )
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="Начальный")],
+                [KeyboardButton(text="Средний")],
+                [KeyboardButton(text="Продвинутый")],
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        )
 
-    await callback_query.message.delete()
-    await callback_query.message.answer(
-        "Чтобы получить программу тренировок, нужно заполнить анкету. Давайте начнём. Укажите вашу физическую подготовку: ",
-        reply_markup=keyboard,
-    )
+        await callback_query.message.delete()
+        await callback_query.message.answer(
+            "Чтобы получить программу тренировок, нужно заполнить анкету. Давайте начнём. Укажите вашу физическую подготовку: ",
+            reply_markup=keyboard,
+        )
+    else:
+        await callback_query.message.answer(
+            "Ваш нужно создать никнейм в Telegram, чтобы позже с Вами мог связаться тренер"
+        )
 
 
 @program_router.message(Form.physical_training)
@@ -197,19 +209,7 @@ async def get_days(message: Message, state: FSMContext):
 
 @program_router.message(Form.time)
 async def get_time(message: Message, state: FSMContext):
-    hours = message.text.split("-")
-    start_h, start_m = int(hours[0].split(":")[0]), int(hours[0].split(":")[1])
-    end_h, end_m = int(hours[1].split(":")[0]), int(hours[1].split(":")[1])
-    if (
-        (
-            (start_h <= end_h and start_m < end_m)
-            or (start_h < end_h and start_m <= end_m)
-        )
-        and 0 <= start_h <= 24
-        and 0 <= end_h <= 24
-        and 0 <= start_m <= 59
-        and 0 <= end_m <= 59
-    ):
+    if is_valid_time_format(message.text):
         await state.update_data(time=message.text)
         await state.set_state(Form.health)
 
@@ -325,3 +325,33 @@ async def get_sleeping(message: Message, state: FSMContext):
             )
     else:
         await message.answer("Вы ввели некорректные данные. Сколько часов Вы спите? ")
+
+
+def is_valid_time_format(time_str):
+    # Проверяем, что строка соответствует формату hh:mm-hh:mm или h:mm-h:mm
+    pattern = r"^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$"
+    if not re.match(pattern, time_str):
+        return False
+
+    # Разделяем строку на части
+    parts = time_str.split("-")
+    start_time = parts[0].split(":")
+    end_time = parts[1].split(":")
+
+    # Проверяем, что часы и минуты находятся в допустимых диапазонах
+    try:
+        start_h, start_m = int(start_time[0]), int(start_time[1])
+        end_h, end_m = int(end_time[0]), int(end_time[1])
+    except ValueError:
+        return False
+
+    if not (
+        0 <= start_h < 24 and 0 <= start_m < 60 and 0 <= end_h < 24 and 0 <= end_m < 60
+    ):
+        return False
+
+    # Проверяем, что время начала не больше времени окончания
+    if start_h > end_h or (start_h == end_h and start_m >= end_m):
+        return False
+
+    return True
