@@ -48,16 +48,21 @@ async def cmd_ready_programs(callback_query: CallbackQuery):
 
 @program_router.callback_query(F.data == "pr1")
 async def cmd_pr1(callback_query: CallbackQuery):
-    with ChatActionSender.upload_document(
-        bot=bot, chat_id=callback_query.message.chat.id
-    ):
+    await DatabaseManager(Program, SessionLocal).add(
+        user_id=int(callback_query.from_user.id),
+        type_training="Программа_1",
+        file_id="BQACAgIAAxkBAAIEK2Z5iomgtSshjBeKV8q7o8qX32Q2AALATgACnyHJS9BF0BvipTWONQQ"
+    )
+    
+    async with ChatActionSender.upload_document(bot=bot, chat_id=callback_query.message.chat.id):
         await callback_query.message.delete()
         try:
             await bot.send_document(
-                callback_query.message.chat.id,
-                InputMediaDocument(type="document", media="file_id"),
+                chat_id=callback_query.message.chat.id,
+                document="BQACAgIAAxkBAAIEK2Z5iomgtSshjBeKV8q7o8qX32Q2AALATgACnyHJS9BF0BvipTWONQQ",
+                protect_content=True
             )
-        except:
+        except Exception as e:
             await callback_query.message.edit_text(
                 "Документ не найден. Попробуйте позже"
             )
@@ -65,14 +70,21 @@ async def cmd_pr1(callback_query: CallbackQuery):
 
 @program_router.callback_query(F.data == "pr2")
 async def cmd_pr1(callback_query: CallbackQuery):
-    with ChatActionSender.upload_document(
+    await DatabaseManager(Program, SessionLocal).add(
+        user_id=int(callback_query.from_user.id),
+        type_training="Программа_2",
+        file_id="BQACAgIAAxkBAAIELWZ5iq2BfrtTLuZarz3sQ0OSRdtgAALCTgACnyHJS91GmSmKz8mZNQQ"
+    )
+    
+    async with ChatActionSender.upload_document(
         bot=bot, chat_id=callback_query.message.chat.id
     ):
         await callback_query.message.delete()
         try:
             await bot.send_document(
-                callback_query.message.chat.id,
-                InputMediaDocument(type="document", media="file_id"),
+                chat_id=callback_query.message.chat.id,
+                document="BQACAgIAAxkBAAIELWZ5iq2BfrtTLuZarz3sQ0OSRdtgAALCTgACnyHJS91GmSmKz8mZNQQ",
+                protect_content=True
             )
         except:
             await callback_query.message.edit_text(
@@ -82,14 +94,21 @@ async def cmd_pr1(callback_query: CallbackQuery):
 
 @program_router.callback_query(F.data == "pr3")
 async def cmd_pr1(callback_query: CallbackQuery):
-    with ChatActionSender.upload_document(
+    await DatabaseManager(Program, SessionLocal).add(
+        user_id=int(callback_query.from_user.id),
+        type_training="Программа_3",
+        file_id="BQACAgIAAxkBAAIEL2Z5ir0pdWHfhuCfisYbgUpMl0mwAAKySgACnyHRS0X7xPN7xGMkNQQ"
+    )
+    
+    async with ChatActionSender.upload_document(
         bot=bot, chat_id=callback_query.message.chat.id
     ):
         await callback_query.message.delete()
         try:
             await bot.send_document(
-                callback_query.message.chat.id,
-                InputMediaDocument(type="document", media="file_id"),
+                chat_id=callback_query.message.chat.id,
+                document="BQACAgIAAxkBAAIEL2Z5ir0pdWHfhuCfisYbgUpMl0mwAAKySgACnyHRS0X7xPN7xGMkNQQ",
+                protect_content=True
             )
         except:
             await callback_query.message.edit_text(
@@ -156,6 +175,10 @@ async def get_purpose(message: Message, state: FSMContext):
             )
 
             await message.answer("Ваша цель: ", reply_markup=keyboard)
+        else:
+            await message.answer(
+                "Вы ввели некорректные данные. Введите вашу физическую подготовку (используйте кнопки): "
+            ) 
 
 
 @program_router.message(Form.purpose)
@@ -183,7 +206,7 @@ async def get_preference(message: Message, state: FSMContext):
         await state.set_state(Form.days)
 
         await message.answer(
-            "Количество тренировок в неделю: ", reply_markup=ReplyKeyboardRemove()
+            "Количество тренировок в неделю: "
         )
     else:
         await message.answer(
@@ -198,8 +221,7 @@ async def get_days(message: Message, state: FSMContext):
         await state.set_state(Form.time)
 
         await message.answer(
-            "В какое время Вы хотите заниматься (начало-конец): ",
-            reply_markup=ReplyKeyboardRemove(),
+            "В какое время Вы хотите заниматься (начало-конец): "
         )
     else:
         await message.answer(
@@ -214,8 +236,7 @@ async def get_time(message: Message, state: FSMContext):
         await state.set_state(Form.health)
 
         await message.answer(
-            "Есть ли какие-то заболевания или травмы? Рекомендации врачей? ",
-            reply_markup=ReplyKeyboardRemove(),
+            "Есть ли какие-то заболевания или травмы? Рекомендации врачей? "
         )
     else:
         await message.answer(
@@ -244,8 +265,7 @@ async def get_equipment(message: Message, state: FSMContext):
         await state.set_state(Form.experience)
 
         await message.answer(
-            "Был ли опыт до этого (Прошлые программы тренировок, результаты прошлых тренировок)",
-            reply_markup=ReplyKeyboardRemove(),
+            "Был ли опыт до этого (Прошлые программы тренировок, результаты прошлых тренировок)"
         )
     else:
         await message.answer(
@@ -259,7 +279,7 @@ async def get_experience(message: Message, state: FSMContext):
     await state.set_state(Form.nutrition)
 
     await message.answer(
-        "Приём пиши до и после тренировки", reply_markup=ReplyKeyboardRemove()
+        "Приём пиши до и после тренировки"
     )
 
 
@@ -268,7 +288,7 @@ async def get_nutrition(message: Message, state: FSMContext):
     await state.update_data(nutrition=message.text)
     await state.set_state(Form.sleeping)
 
-    await message.answer("Сколько часов Вы спите", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Сколько часов Вы спите")
 
 
 @program_router.message(Form.sleeping)
@@ -309,7 +329,7 @@ async def get_sleeping(message: Message, state: FSMContext):
         await DatabaseManager(Program, SessionLocal).add(
             user_id=int(message.from_user.id),
             type_training="Персональная программа",
-            file_id="-",
+            file_id=0
         )
         await DatabaseManager(Questionnaire, SessionLocal).add(
             user_id=int(message.from_user.id),

@@ -40,7 +40,7 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     await DatabaseManager(Menu, SessionLocal).add(
         user_id=int(callback_query.from_user.id),
         type_menu="Похудение",
-        file_id="file_id",
+        file_id="BQACAgIAAxkBAAIEMWZ5iygorUj2lvBsH9JfDueMFq32AAK7SgACnyHRS8fSo0m2UITANQQ"
     )
 
     async with ChatActionSender.upload_document(
@@ -48,8 +48,9 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         await bot.send_document(
-            callback_query.message.chat.id,
-            InputMediaDocument(type="document", media=""),
+            chat_id=callback_query.message.chat.id,
+            document="BQACAgIAAxkBAAIEMWZ5iygorUj2lvBsH9JfDueMFq32AAK7SgACnyHRS8fSo0m2UITANQQ",
+            protect_content=True
         )
 
 
@@ -58,7 +59,7 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     await DatabaseManager(Menu, SessionLocal).add(
         user_id=int(callback_query.from_user.id),
         type_menu="Набор массы",
-        file_id="file_id",
+        file_id="BQACAgIAAxkBAAIEM2Z5jCCMSbTUaZCH4Zynfg2UPc48AALKSgACnyHRS8awZxEM1x40NQQ"
     )
 
     async with ChatActionSender.upload_document(
@@ -66,8 +67,9 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         await bot.send_document(
-            callback_query.message.chat.id,
-            InputMediaDocument(type="document", media=""),
+            chat_id=callback_query.message.chat.id,
+            document="BQACAgIAAxkBAAIEM2Z5jCCMSbTUaZCH4Zynfg2UPc48AALKSgACnyHRS8awZxEM1x40NQQ",
+            protect_content=True
         )
 
 
@@ -76,7 +78,7 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     await DatabaseManager(Menu, SessionLocal).add(
         user_id=int(callback_query.from_user.id),
         type_menu="Поддержание формы",
-        file_id="file_id",
+        file_id="BQACAgIAAxkBAAIENWZ5jNGUCuON_Qv6nDKz61jc0QOsAALRSgACnyHRS-9AESYfJsr0NQQ"
     )
 
     async with ChatActionSender.upload_document(
@@ -84,8 +86,9 @@ async def cmd_weight_loss(callback_query: CallbackQuery):
     ):
         await callback_query.message.delete()
         await bot.send_document(
-            callback_query.message.chat.id,
-            InputMediaDocument(type="document", media=""),
+            chat_id=callback_query.message.chat.id,
+            document="BQACAgIAAxkBAAIENWZ5jNGUCuON_Qv6nDKz61jc0QOsAALRSgACnyHRS-9AESYfJsr0NQQ",
+            protect_content=True
         )
 
 
@@ -103,11 +106,11 @@ async def cmd_personal_program(callback_query: CallbackQuery, state: FSMContext)
     if callback_query.from_user.username:
         await state.set_state(FormMenu.age)
         await callback_query.message.edit_text(
-            "Для получения персонального меню нужно заполнить анкету. Давайте начнём. Введите ваш возраст: "
+            "Для получения персонального меню нужно заполнить анкету. Давайте начнём. Введите ваш возраст: ",
         )
     else:
         await callback_query.message.answer(
-            "Ваш нужно создать никнейм в Telegram, чтобы позже с Вами мог связаться тренер"
+            "Ваш нужно создать никнейм в Telegram, чтобы позже с Вами мог связаться тренер",
         )
 
 
@@ -199,7 +202,7 @@ async def get_medicine(message: Message, state: FSMContext):
     )
     await message.answer("Тренер получил Вашу анкету и работает над Вашим меню")
     await DatabaseManager(Menu, SessionLocal).add(
-        user_id=int(message.from_user.id), type_menu="Персональное меню", file_id="-"
+        user_id=int(message.from_user.id), type_menu="Персональное меню", file_id=0
     )
     await DatabaseManager(Questionnaire, SessionLocal).add(
         user_id=int(message.from_user.id),

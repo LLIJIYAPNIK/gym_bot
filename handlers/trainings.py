@@ -56,7 +56,7 @@ async def process_callback_data(callback_query: CallbackQuery):
             if video_ids:
                 async with ChatActionSender.upload_video(bot=bot, chat_id=callback_query.message.chat.id):
                     await callback_query.message.delete()
-                    await bot.send_media_group(callback_query.message.chat.id, [InputMediaVideo(type="video", media=video_id) for video_id in video_ids])
+                    await bot.send_media_group(callback_query.message.chat.id, [InputMediaVideo(type="video", media=video_id) for video_id in video_ids], protect_content=True)
             else:
                 await callback_query.message.delete()
                 await callback_query.message.edit_text('Нет видео для этого упражнения', reply_markup=await get_start_kb())

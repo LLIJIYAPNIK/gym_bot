@@ -110,7 +110,7 @@ async def get_table(message: Message, state: FSMContext):
 @admin_router.message(F.content_type == ContentType.VIDEO)
 async def get_video_id(message: Message, state: FSMContext):
     if str(message.from_user.id) in ADMINS:
-        video_id = message.video[-1].file_id
+        video_id = message.video.file_id
         await message.reply(f"ID видео: {video_id}")
     else:
         await message.reply("У вас нет прав для выполнения этой команды")

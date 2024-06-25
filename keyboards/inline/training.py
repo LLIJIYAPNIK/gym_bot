@@ -64,7 +64,7 @@ class MuscleKeyboard:
             kb_list.append(
                 [
                     InlineKeyboardButton(
-                        text=muscle_type, callback_data=str(callback_data)
+                        text=" ".join(muscle_type.split("_")), callback_data=str(callback_data)
                     )
                 ]
             )
