@@ -3,6 +3,9 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.start import get_start_kb
 from aiogram.fsm.context import FSMContext
+from database.crud import DatabaseManager
+from database.models import User
+from database.session import SessionLocal
 
 
 start_router = Router()
@@ -12,6 +15,11 @@ start_router = Router()
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("Сейчас начнём...", reply_markup=ReplyKeyboardRemove())
+    if int(message.from_user.id) not in [int(await DatabaseManager(User, SessionLocal).get_by_condition(condition=(User.user_id == int(message.from_user.id)), select_this=User.user_id))]:
+        await DatabaseManager(User, SessionLocal).add(
+            user_id = message.from_user.id,
+            status = "free"
+        )
     await message.answer(
         "Добро пожаловать! Выберите интересующий раздел, чтобы начать",
         reply_markup=get_start_kb(),

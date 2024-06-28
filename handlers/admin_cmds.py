@@ -10,7 +10,6 @@ import os
 from sqlalchemy import inspect
 from config import ADMINS, TABLES
 from create_bot import bot
-from aiogram.fsm.context import FSMContext
 
 
 admin_router = Router()
@@ -22,14 +21,14 @@ def get_column_names(cls):
 
 
 @admin_router.message(Command("add_muscle"))
-async def cmd_add_muscle(message: Message, state: FSMContext):
+async def cmd_add_muscle(message: Message):
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
-        muscle, muscle_type, video_id = args
+        muscle, muscle_type, video_id, status = args
 
         await DatabaseManager(model=Training, session_maker=SessionLocal).add(
-            muscle=muscle, muscle_type=muscle_type, video_id=video_id
+            muscle=muscle, muscle_type=muscle_type, video_id=video_id, status=status
         )
 
         await message.reply("Упражнение добавлено")
@@ -38,14 +37,14 @@ async def cmd_add_muscle(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("edit_muscle"))
-async def cmd_edit_muscle(message: Message, state: FSMContext):
+async def cmd_edit_muscle(message: Message):
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
-        id_, muscle, muscle_type, video_id = args
+        id_, muscle, muscle_type, video_id, status = args
 
         await DatabaseManager(model=Training, session_maker=SessionLocal).update(
-            int(id_), muscle=muscle, muscle_type=muscle_type, video_id=video_id
+            int(id_), muscle=muscle, muscle_type=muscle_type, video_id=video_id, status=status
         )
 
         await message.reply("Упражнение изменено")
@@ -54,7 +53,7 @@ async def cmd_edit_muscle(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("delete_muscle"))
-async def delete_muscle(message: Message, state: FSMContext):
+async def delete_muscle(message: Message):
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -70,7 +69,7 @@ async def delete_muscle(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("get_table"))
-async def get_table(message: Message, state: FSMContext):
+async def get_table(message: Message):
     if str(message.from_user.id) in ADMINS:
         table_name = message.text.split()[1]
         if table_name in TABLES:
@@ -108,7 +107,7 @@ async def get_table(message: Message, state: FSMContext):
 
 
 @admin_router.message(F.content_type == ContentType.VIDEO)
-async def get_video_id(message: Message, state: FSMContext):
+async def get_video_id(message: Message):
     if str(message.from_user.id) in ADMINS:
         video_id = message.video.file_id
         await message.reply(f"ID видео: {video_id}")
@@ -117,8 +116,7 @@ async def get_video_id(message: Message, state: FSMContext):
 
 
 @admin_router.message(F.content_type == ContentType.DOCUMENT)
-async def get_document_id(message: Message, state: FSMContext):
-    await state.clear()
+async def get_document_id(message: Message):
     if str(message.from_user.id) in ADMINS:
         document_id = message.document.file_id
         await message.reply(f"ID документа: {document_id}")
@@ -127,7 +125,7 @@ async def get_document_id(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("send_document"))
-async def send_document(message: Message, state: FSMContext):
+async def send_document(message: Message):
     if str(message.from_user.id) in ADMINS:
         args = message.text.split()[1:]
 
@@ -150,7 +148,7 @@ async def send_document(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("get_document"))
-async def get_document(message: Message, state: FSMContext):
+async def get_document(message: Message):
     if str(message.from_user.id) in ADMINS:
         document_id = message.text.split()[1]
 
@@ -160,7 +158,7 @@ async def get_document(message: Message, state: FSMContext):
 
 
 @admin_router.message(Command("get_username"))
-async def get_username(message: Message, state: FSMContext):
+async def get_username(message: Message):
     if str(message.from_user.id) in ADMINS:
         user_id = message.text.split()[1]
 
@@ -173,7 +171,7 @@ async def get_username(message: Message, state: FSMContext):
         
         
 @admin_router.message(Command("commands"))
-async def get_commands(message: Message, state: FSMContext):
+async def get_commands(message: Message):
     await message.answer(
 """/add_muscle [muscle] [muscle_type] [video_id] - добавляет в базу данных упражнение. muscle - группа мышц (Спина), muscle_type - отдельная мыщца (Широчайшая), video_id - id видео\n
 /edit_muscle [id] [muscle] [muscle_type] [video_id] - изменяет упражнение в базе данных. id - номер упражнения в базе данных, muscle, muscle_type, video_id - новые значения\n

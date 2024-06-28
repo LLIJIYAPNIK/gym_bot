@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InputMediaVideo
-from database.models import Training
+from database.models import Training, User
 from database.session import SessionLocal
 from keyboards.inline.start import get_start_kb
 from aiogram.utils.chat_action import ChatActionSender
@@ -8,6 +8,7 @@ from database.crud import DatabaseManager
 from keyboards.inline.training import MuscleKeyboard
 import json
 from create_bot import bot
+from sqlalchemy import and_
 
 
 trainings_router = Router()
@@ -49,7 +50,10 @@ async def process_callback_data(callback_query: CallbackQuery):
         
         key = get_key_by_value(dictioary, data)
         if key in muscles:
-            await callback_query.message.edit_text('Выберите группу мышц, чтобы увидеть доступные упражнения', reply_markup= await MuscleKeyboard().get_sub_keyboard(key))
+            if callback_query.message.from_user.id == int(await DatabaseManager(User, SessionLocal).get_by_condition(condition=and_(User.user_id == int(callback_query.from_user.id), User.status == "free"), select_this=User.user_id)):
+                await callback_query.message.edit_text('Выберите группу мышц, чтобы увидеть доступные упражнения', reply_markup= await MuscleKeyboard().get_free_keyboard(key))
+            else:
+                await callback_query.message.edit_text('Выберите группу мышц, чтобы увидеть доступные упражнения', reply_markup= await MuscleKeyboard().get_premium_keyboard(key))
         else:
             video_ids = set(await DatabaseManager(Training, SessionLocal).get_by_condition(condition=(Training.muscle_type == key), quantity=True, select_this=Training.video_id))
             

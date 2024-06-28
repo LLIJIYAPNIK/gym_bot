@@ -48,17 +48,18 @@ class MuscleKeyboard:
         )
 
         return InlineKeyboardMarkup(inline_keyboard=kb_list)
-
-    async def get_sub_keyboard(self, muscle: str):
+    
+    async def get_free_keyboard(self, muscle: str):
         kb_list = []
+        
         trainings = set(
             await DatabaseManager(Training, SessionLocal).get_by_condition(
-                condition=(Training.muscle == muscle),
+                condition=(Training.muscle == muscle, Training.user.status == "free", Training.status == "free"),
                 quantity=True,
                 select_this=Training.muscle_type,
             )
         )
-
+        
         for muscle_type in trainings:
             callback_data = self.get_or_create_translation(muscle_type)
             kb_list.append(
@@ -74,7 +75,34 @@ class MuscleKeyboard:
         )
 
         return InlineKeyboardMarkup(inline_keyboard=kb_list)
+    
+    async def get_premium_keyboard(self, muscle: str):
+        kb_list = []
+        
+        trainings = set(
+            await DatabaseManager(Training, SessionLocal).get_by_condition(
+                condition=(Training.muscle == muscle),
+                quantity=True,
+                select_this=Training.muscle_type,
+            )
+        )
+        
+        for muscle_type in trainings:
+            callback_data = self.get_or_create_translation(muscle_type)
+            kb_list.append(
+                [
+                    InlineKeyboardButton(
+                        text=" ".join(muscle_type.split("_")), callback_data=str(callback_data)
+                    )
+                ]
+            )
 
+        kb_list.append(
+            [InlineKeyboardButton(text="Назад", callback_data="back_to_training")]
+        )
+
+        return InlineKeyboardMarkup(inline_keyboard=kb_list)
+        
     def create_value(self):
         num = random.randint(0, 1000)
         while True:

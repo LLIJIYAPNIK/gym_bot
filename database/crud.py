@@ -32,10 +32,9 @@ class DatabaseManager:
                 return result.scalars().first()
             return result.scalars().all()
 
-    async def get_all(self, model):
+    async def get_all(self):
         async with self.session_maker() as session:
-            result = await session.execute(select(model))
-            columns = result.keys()
+            result = await session.execute(select(self.model))
             return result.fetchall()
 
     async def update(self, id: int, **kwargs):
